@@ -56,13 +56,14 @@ public class TransactionManagerImpl implements TransactionManager {
      */
     public RelativeBalance calculateRelativeBalanceDetails(List<Transaction> allTransactions, String accountId, String fromDateString, String toDateString) {
         List<Transaction> transactions = new ArrayList<>();
-        RelativeBalance relativeBalance = null;
+        RelativeBalance relativeBalance = new RelativeBalance();
         int count = 0;
         double totalAmount = 0;
         try {
             if (allTransactions.isEmpty() || accountId == null || accountId.isEmpty()
                     || fromDateString == null || fromDateString.isEmpty()
                     || toDateString == null || toDateString.isEmpty()) {
+                relativeBalance = null;
                 throw new InvalidParameterException("The input parameters cannot be null. ");
             } else {
                 //parses the to and from date string into date format.
