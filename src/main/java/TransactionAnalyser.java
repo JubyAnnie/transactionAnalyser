@@ -25,8 +25,9 @@ public class TransactionAnalyser {
         RelativeBalance relativeBalance = transactionManager.calculateRelativeBalanceDetails(transactions, accountId, fromDate
                 , toDate);
         //print the relative balance and no:of included transactions.
-        System.out.println("Relative balance for the period is:" + relativeBalance.getAmount());
-        System.out.println("Number of transactions included is:" + relativeBalance.getValidTransactions());
-
+        if (relativeBalance != null) {
+            System.out.println("Relative balance for the period is:" + relativeBalance.getAmount());
+            System.out.println("Number of transactions included is:" + relativeBalance.getValidTransactions());
+        }
     }
 }

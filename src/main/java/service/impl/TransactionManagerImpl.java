@@ -2,6 +2,7 @@ package service.impl;
 
 import domain.RelativeBalance;
 import dto.Transaction;
+import org.apache.log4j.Logger;
 import service.TransactionManager;
 
 import java.io.*;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
  * Implementation of Service class responsible for processing financial transactions.
  */
 public class TransactionManagerImpl implements TransactionManager {
+    final static Logger logger = Logger.getLogger(TransactionManagerImpl.class);
     private DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     /**
@@ -36,31 +38,32 @@ public class TransactionManagerImpl implements TransactionManager {
             transactions = br.lines().map(mapToItem).collect(Collectors.toList());
             br.close();
         } catch (FileNotFoundException e) {
-            System.out.println("The input file is not found " + e.getMessage());
+            logger.info("The input file is not found. " + e.getMessage());
         } catch (IOException e) {
-            System.out.println("IO Exception " + e.getMessage());
+            logger.info("IO Exception. " + e.getMessage());
         }
         return transactions;
     }
 
     /**
      * Calculates the relative balance amount and the no:of transactions included
-     * @param allTransactions      the list of transactions
-     * @param accountId         the account id to be considered
-     * @param fromDateString    the from date
-     * @param toDateString      the to date
-     * @return                  relative balance details.
+     *
+     * @param allTransactions the list of transactions
+     * @param accountId       the account id to be considered
+     * @param fromDateString  the from date
+     * @param toDateString    the to date
+     * @return relative balance details.
      */
     public RelativeBalance calculateRelativeBalanceDetails(List<Transaction> allTransactions, String accountId, String fromDateString, String toDateString) {
         List<Transaction> transactions = new ArrayList<>();
-        RelativeBalance relativeBalance = new RelativeBalance();
+        RelativeBalance relativeBalance = null;
         int count = 0;
         double totalAmount = 0;
         try {
             if (allTransactions.isEmpty() || accountId == null || accountId.isEmpty()
                     || fromDateString == null || fromDateString.isEmpty()
                     || toDateString == null || toDateString.isEmpty()) {
-                throw new InvalidParameterException("The input parameters cannot be null");
+                throw new InvalidParameterException("The input parameters cannot be null. ");
             } else {
                 //parses the to and from date string into date format.
                 Date fromDate = df.parse(fromDateString);
@@ -69,7 +72,7 @@ public class TransactionManagerImpl implements TransactionManager {
                 // also removes the REVERSAL transactions and the corresponding related transaction (the transaction that's reversed).
                 allTransactions.stream().filter(transaction -> (transaction.getFromAccountId().equals(accountId.trim()) || transaction.getToAccountId().equals(accountId.trim())))
                         .forEach(transaction -> {
-                            if (transaction.getTransactionType().trim().equals("REVERSAL")  && !transactions.isEmpty()) {
+                            if (transaction.getTransactionType().trim().equals("REVERSAL") && !transactions.isEmpty()) {
                                 transactions.removeIf(transaction1 -> transaction1.getTransactionId().trim().equals(transaction.getRelatedTransaction().trim()));
                             } else {
                                 transactions.add(transaction);
@@ -93,9 +96,9 @@ public class TransactionManagerImpl implements TransactionManager {
                 relativeBalance.setValidTransactions(count);
             }
         } catch (ParseException e) {
-            System.out.print("DatTime parse exception" + e);
+            logger.info("DatTime parse exception. " + e);
         } catch (InvalidParameterException e) {
-            System.out.println("Invalid input parameters" + e.getMessage());
+            logger.info("Invalid input parameters. " + e.getMessage());
         }
         return relativeBalance;
     }
@@ -120,7 +123,7 @@ public class TransactionManagerImpl implements TransactionManager {
                 }
             }
         } catch (ParseException e) {
-            System.out.println("An error occurred while parsing the dates" + e.getMessage());
+            logger.info("An error occurred while parsing the dates. " + e.getMessage());
         }
         return transaction;
     };
